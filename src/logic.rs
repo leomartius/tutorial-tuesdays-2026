@@ -1,15 +1,21 @@
+mod level;
+
+use level::Level;
+
 pub struct Game {
-    width: i32,
-    height: i32,
     player: (i32, i32),
+    level: Level,
 }
 
 impl Game {
-    pub fn new(width: i32, height: i32) -> Self {
+    pub fn new() -> Self {
+        let mut level = Level::new(80, 45);
+        for x in 30..33 {
+            level.set_tile(x, 22, Tile::Wall);
+        }
         Self {
-            width,
-            height,
-            player: (width / 2, height / 2),
+            player: (40, 25),
+            level,
         }
     }
 
@@ -20,10 +26,20 @@ impl Game {
     pub fn move_player(&mut self, dx: i32, dy: i32) -> Result<(), ()> {
         let x = self.player.0 + dx;
         let y = self.player.1 + dy;
-        if 0 <= x && x < self.width && 0 <= y && y < self.height {
+        if self.level.in_bounds(x, y) && self.level.is_walkable(x, y) {
             self.player = (x, y);
             return Ok(());
         }
         Err(())
     }
+
+    pub fn level(&self) -> &Level {
+        &self.level
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum Tile {
+    Wall,
+    Floor,
 }

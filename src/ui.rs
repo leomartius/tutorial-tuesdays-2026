@@ -1,6 +1,7 @@
 use anyhow::Result;
 
-use crate::console::{Console, Event, Key};
+use crate::console::{Color, Console, Event, Key};
+use crate::logic::{Game, Tile};
 
 pub enum Command {
     Move(i32, i32),
@@ -38,4 +39,26 @@ pub fn get_command(console: &mut Console) -> Result<Command> {
         };
         return Ok(command);
     }
+}
+
+const WALL_BG: Color = Color::rgb(0, 0, 100);
+const FLOOR_BG: Color = Color::rgb(50, 50, 150);
+const PLAYER_FG: Color = Color::rgb(255, 255, 255);
+
+pub fn render_map(console: &mut Console, game: &Game) {
+    for y in 0..game.level().height() {
+        for x in 0..game.level().width() {
+            let bg = match game.level().get_tile(x, y) {
+                Tile::Wall => WALL_BG,
+                Tile::Floor => FLOOR_BG,
+            };
+            console.set_cell(x, y, '\x20', Color::Default, bg);
+        }
+    }
+}
+
+pub fn render_player(console: &mut Console, game: &Game) {
+    let (x, y) = game.player();
+    console.print_char(x, y, '@', PLAYER_FG);
+    console.show_cursor(x, y);
 }

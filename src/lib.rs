@@ -4,19 +4,18 @@ mod ui;
 
 use anyhow::Result;
 
-use console::{Color, Console};
+use console::Console;
 use logic::Game;
 use ui::Command;
 
 pub fn run() -> Result<()> {
-    let mut game = Game::new(80, 50);
     let mut console = Console::new(80, 50, "Yet Another Roguelike Tutorial")?;
+    let mut game = Game::new();
 
     loop {
         console.clear();
-        let (x, y) = game.player();
-        console.print_char(x, y, '@', Color::Default);
-        console.show_cursor(x, y);
+        ui::render_map(&mut console, &game);
+        ui::render_player(&mut console, &game);
         console.display()?;
 
         match ui::get_command(&mut console)? {

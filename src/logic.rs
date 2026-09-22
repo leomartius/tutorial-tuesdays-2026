@@ -1,4 +1,5 @@
 mod action;
+mod generate;
 mod level;
 mod world;
 
@@ -16,14 +17,11 @@ pub struct Game {
 
 impl Game {
     pub fn new() -> Self {
-        let mut level = Level::new(80, 45);
-        for x in 30..33 {
-            level.set_tile(Vec2 { x, y: 22 }, Tile::Wall);
-        }
+        let level = generate::generate_level();
         let mut world = World::new();
         let player = world.spawn();
         world.set_glyph(player, Glyph::Player);
-        world.set_position(player, Vec2 { x: 40, y: 25 });
+        world.set_position(player, level.entry());
         let npc = world.spawn();
         world.set_glyph(npc, Glyph::Npc);
         world.set_position(npc, Vec2 { x: 35, y: 25 });

@@ -1,8 +1,10 @@
+mod action;
 mod level;
 mod world;
 
 use std::ops::Add;
 
+pub use action::Action;
 use level::Level;
 use world::{Entity, World};
 
@@ -32,13 +34,10 @@ impl Game {
         }
     }
 
-    pub fn move_player(&mut self, dx: i32, dy: i32) -> Result<(), ()> {
-        let pos = self.world.get_position(self.player) + Vec2 { x: dx, y: dy };
-        if self.level.in_bounds(pos) && self.level.is_walkable(pos) {
-            self.world.set_position(self.player, pos);
-            return Ok(());
-        }
-        Err(())
+    pub fn player_action(&mut self, action: Action) -> Result<(), ()> {
+        action.validate(self.player, self)?;
+        action.perform(self.player, self);
+        Ok(())
     }
 
     pub fn level(&self) -> &Level {

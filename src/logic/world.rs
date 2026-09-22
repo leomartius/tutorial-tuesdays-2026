@@ -59,7 +59,7 @@ impl World {
         if let Some(old_pos) = old_pos {
             self.occupancy.remove(&old_pos);
         }
-        // debug_assert!(!self.occupancy.contains_key(&pos));
+        debug_assert!(!self.occupancy.contains_key(&pos));
         self.occupancy.insert(pos, entity);
     }
 

@@ -5,7 +5,7 @@ mod ui;
 use anyhow::Result;
 
 use console::Console;
-use logic::Game;
+use logic::{Action, Game};
 use ui::Command;
 
 pub fn run() -> Result<()> {
@@ -20,7 +20,9 @@ pub fn run() -> Result<()> {
         console.display()?;
 
         match ui::get_command(&mut console)? {
-            Command::Move(dx, dy) => game.move_player(dx, dy).or_else(|_| console.alert())?,
+            Command::Move(dx, dy) => game
+                .player_action(Action::move_by(dx, dy))
+                .or_else(|_| console.alert())?,
             Command::Redraw => console.reset()?,
             Command::Abort => break,
         };

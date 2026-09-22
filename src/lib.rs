@@ -6,17 +6,18 @@ use anyhow::Result;
 
 use console::Console;
 use logic::{Action, Game};
-use ui::Command;
+use ui::{Command, Theme};
 
 pub fn run() -> Result<()> {
+    let theme = Theme {};
     let mut console = Console::new(80, 50, "Yet Another Roguelike Tutorial")?;
     let mut game = Game::new();
 
     loop {
         console.clear();
-        ui::render_map(&mut console, &game);
-        ui::render_entities(&mut console, &game);
-        ui::render_player(&mut console, &game);
+        ui::render_map(&mut console, theme, &game);
+        ui::render_entities(&mut console, theme, &game);
+        ui::render_player(&mut console, theme, &game);
         console.display()?;
 
         match ui::get_command(&mut console)? {

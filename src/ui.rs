@@ -1,7 +1,14 @@
+mod render;
+mod theme;
+
 use anyhow::Result;
 
-use crate::console::{Color, Console, Event, Key};
-use crate::logic::{Game, Glyph, Tile, Vec2};
+use crate::console::{Console, Event, Key};
+
+pub use render::render_entities;
+pub use render::render_map;
+pub use render::render_player;
+pub use theme::Theme;
 
 pub enum Command {
     Move(i32, i32),
@@ -39,38 +46,4 @@ pub fn get_command(console: &mut Console) -> Result<Command> {
         };
         return Ok(command);
     }
-}
-
-const WALL_BG: Color = Color::rgb(0, 0, 100);
-const FLOOR_BG: Color = Color::rgb(50, 50, 150);
-const PLAYER_FG: Color = Color::rgb(255, 255, 255);
-const NPC_FG: Color = Color::rgb(255, 255, 0);
-
-pub fn render_map(console: &mut Console, game: &Game) {
-    for y in 0..game.level().height() {
-        for x in 0..game.level().width() {
-            let bg = match game.level().get_tile(Vec2 { x, y }) {
-                Tile::Wall => WALL_BG,
-                Tile::Floor => FLOOR_BG,
-            };
-            console.set_cell(x, y, '\x20', Color::Default, bg);
-        }
-    }
-}
-
-pub fn render_entities(console: &mut Console, game: &Game) {
-    for e in game.world().entities() {
-        let pos = game.world().get_position(e);
-        let fg = match game.world().get_glyph(e) {
-            Glyph::Player => PLAYER_FG,
-            Glyph::Npc => NPC_FG,
-        };
-        console.print_char(pos.x, pos.y, '@', fg);
-    }
-}
-
-pub fn render_player(console: &mut Console, game: &Game) {
-    let player = game.player();
-    let pos = game.world().get_position(player);
-    console.show_cursor(pos.x, pos.y);
 }

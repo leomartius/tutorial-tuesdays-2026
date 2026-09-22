@@ -15,6 +15,7 @@ pub fn run() -> Result<()> {
     loop {
         console.clear();
         ui::render_map(&mut console, &game);
+        ui::render_entities(&mut console, &game);
         ui::render_player(&mut console, &game);
         console.display()?;
 

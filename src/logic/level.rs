@@ -1,4 +1,4 @@
-use super::Tile;
+use super::{Tile, Vec2};
 
 pub struct Level {
     width: i32,
@@ -24,29 +24,26 @@ impl Level {
         self.height
     }
 
-    fn index(&self, x: i32, y: i32) -> usize {
-        debug_assert!(self.in_bounds(x, y));
-        (y as usize) * (self.width as usize) + (x as usize)
+    fn index(&self, pos: Vec2) -> usize {
+        debug_assert!(self.in_bounds(pos));
+        (pos.y as usize) * (self.width as usize) + (pos.x as usize)
     }
 
-    pub fn in_bounds(&self, x: i32, y: i32) -> bool {
-        0 <= x && x < self.width && 0 <= y && y < self.height
+    pub fn in_bounds(&self, pos: Vec2) -> bool {
+        0 <= pos.x && pos.x < self.width && 0 <= pos.y && pos.y < self.height
     }
 
-    pub fn get_tile(&self, x: i32, y: i32) -> Tile {
-        debug_assert!(self.in_bounds(x, y));
-        let index = self.index(x, y);
+    pub fn get_tile(&self, pos: Vec2) -> Tile {
+        let index = self.index(pos);
         self.tiles[index]
     }
 
-    pub fn set_tile(&mut self, x: i32, y: i32, tile: Tile) {
-        debug_assert!(self.in_bounds(x, y));
-        let index = self.index(x, y);
+    pub fn set_tile(&mut self, pos: Vec2, tile: Tile) {
+        let index = self.index(pos);
         self.tiles[index] = tile;
     }
 
-    pub fn is_walkable(&self, x: i32, y: i32) -> bool {
-        debug_assert!(self.in_bounds(x, y));
-        self.get_tile(x, y) == Tile::Floor
+    pub fn is_walkable(&self, pos: Vec2) -> bool {
+        self.get_tile(pos) == Tile::Floor
     }
 }

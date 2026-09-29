@@ -84,9 +84,20 @@ impl Level {
     }
 
     pub fn update_vision(&mut self, pov: Vec2) {
-        compute_fov(&mut self.visible, self.width, self.height, pov.x, pov.y);
-        for (e, v) in self.explored.iter_mut().zip(&self.visible) {
-            *e |= *v;
-        }
+        let radius = 8;
+        self.visible.fill(false);
+        let is_transparent =
+            |x, y| self.tiles[y as usize * self.width as usize + x as usize] != Tile::Wall;
+        let set_visible = |x, y| {
+            self.visible[y as usize * self.width as usize + x as usize] = true;
+            self.explored[y as usize * self.width as usize + x as usize] = true
+        };
+        compute_fov(
+            (self.width, self.height),
+            is_transparent,
+            set_visible,
+            (pov.x, pov.y),
+            radius,
+        );
     }
 }

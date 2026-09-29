@@ -5,6 +5,19 @@ use crate::logic::{Glyph, Tile};
 pub struct Theme;
 
 impl Theme {
+    pub fn visible_ch(&self, _tile: Tile) -> char {
+        '\x20' // ASCII space
+    }
+    pub fn visible_fg(&self, _tile: Tile) -> Color {
+        Color::Default
+    }
+    pub fn visible_bg(&self, tile: Tile) -> Color {
+        match tile {
+            Tile::Wall => Color::rgb(130, 110, 50),
+            Tile::Floor => Color::rgb(200, 180, 50),
+        }
+    }
+
     pub fn explored_ch(&self, _tile: Tile) -> char {
         '\x20' // ASCII space
     }

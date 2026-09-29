@@ -1,11 +1,14 @@
 use std::cmp::{max, min};
 
+use super::fov::compute_fov;
 use super::{Tile, Vec2};
 
 pub struct Level {
     width: i32,
     height: i32,
     tiles: Vec<Tile>,
+    visible: Vec<bool>,
+    explored: Vec<bool>,
     entry: Vec2,
 }
 
@@ -13,10 +16,13 @@ impl Level {
     pub fn new(width: i32, height: i32, entry: Vec2) -> Self {
         debug_assert!(width > 0 && height > 0);
         debug_assert!(0 <= entry.x && entry.x < width && 0 <= entry.y && entry.y < height);
+        let size = (width as usize) * (height as usize);
         Self {
             width,
             height,
-            tiles: vec![Tile::Wall; (width as usize) * (height as usize)],
+            tiles: vec![Tile::Wall; size],
+            visible: vec![false; size],
+            explored: vec![false; size],
             entry,
         }
     }
@@ -65,5 +71,22 @@ impl Level {
 
     pub fn is_walkable(&self, pos: Vec2) -> bool {
         self.get_tile(pos) == Tile::Floor
+    }
+
+    pub fn is_visible(&self, pos: Vec2) -> bool {
+        let index = self.index(pos);
+        self.visible[index]
+    }
+
+    pub fn is_explored(&self, pos: Vec2) -> bool {
+        let index = self.index(pos);
+        self.explored[index]
+    }
+
+    pub fn update_vision(&mut self, pov: Vec2) {
+        compute_fov(&mut self.visible, self.width, self.height, pov.x, pov.y);
+        for (e, v) in self.explored.iter_mut().zip(&self.visible) {
+            *e |= *v;
+        }
     }
 }

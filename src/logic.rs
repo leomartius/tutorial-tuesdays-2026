@@ -1,4 +1,5 @@
 mod action;
+mod fov;
 mod generate;
 mod level;
 mod world;
@@ -17,7 +18,7 @@ pub struct Game {
 
 impl Game {
     pub fn new() -> Self {
-        let level = generate::generate_level();
+        let mut level = generate::generate_level();
         let mut world = World::new();
         let player = world.spawn();
         world.set_glyph(player, Glyph::Player);
@@ -25,6 +26,7 @@ impl Game {
         let npc = world.spawn();
         world.set_glyph(npc, Glyph::Npc);
         world.set_position(npc, Vec2 { x: 35, y: 25 });
+        level.update_vision(level.entry());
         Self {
             level,
             world,
@@ -35,6 +37,8 @@ impl Game {
     pub fn player_action(&mut self, action: Action) -> Result<(), ()> {
         action.validate(self.player, self)?;
         action.perform(self.player, self);
+        let pov = self.world.get_position(self.player);
+        self.level.update_vision(pov);
         Ok(())
     }
 

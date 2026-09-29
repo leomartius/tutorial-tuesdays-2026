@@ -1,4 +1,5 @@
 mod action;
+mod definitions;
 mod fov;
 mod generate;
 mod level;
@@ -7,6 +8,7 @@ mod world;
 use std::ops::Add;
 
 pub use action::Action;
+use definitions::ActorKind;
 use level::Level;
 use world::{Entity, World};
 
@@ -18,15 +20,10 @@ pub struct Game {
 
 impl Game {
     pub fn new() -> Self {
-        let mut level = generate::generate_level();
         let mut world = World::new();
-        let player = world.spawn();
-        world.set_glyph(player, Glyph::Player);
-        world.set_position(player, level.entry());
-        let npc = world.spawn();
-        world.set_glyph(npc, Glyph::Npc);
-        world.set_position(npc, Vec2 { x: 35, y: 25 });
-        level.update_vision(level.entry());
+        let player = spawn_actor(&mut world, ActorKind::Player, None);
+        let mut level = generate::generate_level(&mut world, player);
+        level.update_vision(world.get_position(player));
         Self {
             level,
             world,
@@ -61,16 +58,26 @@ pub enum Tile {
     Floor,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy)]
 pub enum Glyph {
     Player,
-    Npc,
+    Orc,
+    Troll,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Vec2 {
     pub x: i32,
     pub y: i32,
+}
+
+impl From<(i32, i32)> for Vec2 {
+    fn from(tuple: (i32, i32)) -> Self {
+        Vec2 {
+            x: tuple.0,
+            y: tuple.1,
+        }
+    }
 }
 
 impl Add for Vec2 {
@@ -81,4 +88,14 @@ impl Add for Vec2 {
             y: self.y + rhs.y,
         }
     }
+}
+
+fn spawn_actor(world: &mut World, kind: ActorKind, pos: Option<Vec2>) -> Entity {
+    let actor = world.spawn();
+    if let Some(pos) = pos {
+        world.set_position(actor, pos);
+    }
+    let def = kind.def();
+    world.set_glyph(actor, def.glyph);
+    actor
 }

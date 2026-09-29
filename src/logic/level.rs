@@ -9,13 +9,11 @@ pub struct Level {
     tiles: Vec<Tile>,
     visible: Vec<bool>,
     explored: Vec<bool>,
-    entry: Vec2,
 }
 
 impl Level {
-    pub fn new(width: i32, height: i32, entry: Vec2) -> Self {
+    pub fn new(width: i32, height: i32) -> Self {
         debug_assert!(width > 0 && height > 0);
-        debug_assert!(0 <= entry.x && entry.x < width && 0 <= entry.y && entry.y < height);
         let size = (width as usize) * (height as usize);
         Self {
             width,
@@ -23,7 +21,6 @@ impl Level {
             tiles: vec![Tile::Wall; size],
             visible: vec![false; size],
             explored: vec![false; size],
-            entry,
         }
     }
 
@@ -33,10 +30,6 @@ impl Level {
 
     pub fn height(&self) -> i32 {
         self.height
-    }
-
-    pub fn entry(&self) -> Vec2 {
-        self.entry
     }
 
     fn index(&self, pos: Vec2) -> usize {

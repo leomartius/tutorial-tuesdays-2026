@@ -34,13 +34,15 @@ impl Theme {
     pub fn entity_ch(&self, glyph: Glyph) -> char {
         match glyph {
             Glyph::Player => '@',
-            Glyph::Npc => '@',
+            Glyph::Orc => 'o',
+            Glyph::Troll => 'T',
         }
     }
     pub fn entity_fg(&self, glyph: Glyph) -> Color {
         match glyph {
             Glyph::Player => Color::rgb(255, 255, 255),
-            Glyph::Npc => Color::rgb(255, 255, 0),
+            Glyph::Orc => Color::rgb(63, 127, 63),
+            Glyph::Troll => Color::rgb(0, 127, 0),
         }
     }
 }

@@ -1,8 +1,10 @@
 use log::info;
 use rand::{RngExt, SeedableRng, rngs::SmallRng};
 
+use super::Tile;
+use super::definitions::ActorKind;
 use super::level::Level;
-use super::{Tile, Vec2};
+use super::world::{Entity, World};
 
 pub const MAP_WIDTH: i32 = 80;
 pub const MAP_HEIGHT: i32 = 45;
@@ -10,6 +12,8 @@ pub const MAP_HEIGHT: i32 = 45;
 pub const ROOM_MIN_SIZE: i32 = 5;
 pub const ROOM_MAX_SIZE: i32 = 9;
 pub const ROOM_MAX_COUNT: usize = 30;
+
+pub const MAX_MONSTERS_PER_ROOM: usize = 2;
 
 struct Room {
     x0: i32,
@@ -69,7 +73,7 @@ impl Room {
     }
 }
 
-pub fn generate_level() -> Level {
+pub fn generate_level(world: &mut World, player: Entity) -> Level {
     let mut rng = seeded_rng();
     let mut rooms: Vec<Room> = Vec::with_capacity(ROOM_MAX_COUNT);
 
@@ -91,8 +95,7 @@ pub fn generate_level() -> Level {
         rooms.push(room);
     }
 
-    let (x, y) = rooms[0].random_xy(&mut rng);
-    let mut level = Level::new(MAP_WIDTH, MAP_HEIGHT, Vec2 { x, y });
+    let mut level = Level::new(MAP_WIDTH, MAP_HEIGHT);
     for room in &rooms {
         room.carve(&mut level);
     }
@@ -103,7 +106,27 @@ pub fn generate_level() -> Level {
         }
     }
 
+    world.set_position(player, rooms[0].random_xy(&mut rng).into());
+    for room in &rooms {
+        place_monsters(room, world, &mut rng);
+    }
+
     level
+}
+
+fn place_monsters(room: &Room, world: &mut World, rng: &mut impl RngExt) {
+    for _ in 0..rng.random_range(0..=MAX_MONSTERS_PER_ROOM) {
+        let pos = room.random_xy(rng).into();
+        if world.is_occupied(pos) {
+            continue;
+        }
+        let kind = if rng.random_ratio(4, 5) {
+            ActorKind::Orc
+        } else {
+            ActorKind::Troll
+        };
+        super::spawn_actor(world, kind, Some(pos));
+    }
 }
 
 fn seeded_rng() -> impl RngExt {

@@ -7,6 +7,7 @@ mod level;
 mod world;
 
 use actions::{ActionIntent, ActionPlan};
+use behaviors::Behavior;
 use definitions::ActorKind;
 use level::Level;
 use world::{Entity, World};
@@ -47,8 +48,7 @@ impl Game {
     fn handle_enemy_turns(&mut self) {
         let actors: Vec<_> = self.world.behaviors().map(|(e, _)| e).collect();
         for actor in actors {
-            let behavior = self.world.get_behavior(actor);
-            let intent = behavior.take_turn(self, actor);
+            let intent = Behavior::take_turn(self, actor);
             let plan = intent.validate(self).unwrap_or(ActionPlan::Wait { actor });
             plan.perform(self);
         }

@@ -95,6 +95,11 @@ impl World {
         &self.behaviors[entity]
     }
 
+    pub fn get_behavior_mut(&mut self, entity: Entity) -> &mut Behavior {
+        debug_assert!(self.behaviors.contains_key(entity));
+        &mut self.behaviors[entity]
+    }
+
     pub fn set_behavior(&mut self, entity: Entity, behavior: Behavior) {
         self.behaviors.insert(entity, behavior);
     }

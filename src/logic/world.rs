@@ -9,10 +9,14 @@ new_key_type! {
 }
 
 pub struct World {
+    // entity ID
     entities: SlotMap<Entity, ()>,
+    // entity position + reverse spatial index
     positions: SecondaryMap<Entity, Pos>,
     occupancy: HashMap<Pos, Entity>,
+    // other components
     glyphs: SecondaryMap<Entity, Glyph>,
+    names: SecondaryMap<Entity, &'static str>,
 }
 
 impl World {
@@ -22,6 +26,7 @@ impl World {
             positions: SecondaryMap::new(),
             occupancy: HashMap::new(),
             glyphs: SecondaryMap::new(),
+            names: SecondaryMap::new(),
         }
     }
 
@@ -30,6 +35,7 @@ impl World {
         self.positions.clear();
         self.occupancy.clear();
         self.glyphs.clear();
+        self.names.clear();
     }
 
     pub fn entities(&self) -> slotmap::basic::Keys<'_, Entity, ()> {
@@ -47,6 +53,7 @@ impl World {
             self.occupancy.remove(&old_pos);
         }
         self.glyphs.remove(entity);
+        self.names.remove(entity);
     }
 
     pub fn get_position(&self, entity: Entity) -> Pos {
@@ -78,5 +85,14 @@ impl World {
 
     pub fn set_glyph(&mut self, entity: Entity, glyph: Glyph) {
         self.glyphs.insert(entity, glyph);
+    }
+
+    pub fn get_name(&self, entity: Entity) -> &str {
+        debug_assert!(self.glyphs.contains_key(entity));
+        self.names[entity]
+    }
+
+    pub fn set_name(&mut self, entity: Entity, name: &'static str) {
+        self.names.insert(entity, name);
     }
 }

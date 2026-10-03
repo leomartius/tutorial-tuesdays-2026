@@ -1,11 +1,11 @@
-mod action;
+mod actions;
 mod definitions;
 mod fov;
 mod generate;
 mod level;
 mod world;
 
-pub use action::Action;
+use actions::ActionIntent;
 use definitions::ActorKind;
 use level::Level;
 use world::{Entity, World};
@@ -29,11 +29,18 @@ impl Game {
         }
     }
 
-    pub fn player_action(&mut self, action: Action) -> Result<(), ()> {
-        action.validate(self.player, self)?;
-        action.perform(self.player, self);
+    pub fn player_command(&mut self, command: PlayerCommand) -> Result<(), ()> {
+        let intent = command.into_intent(self.player);
+        let plan = intent.validate(self).map_err(|_| ())?;
+        plan.perform(self);
         let pov = self.world.get_position(self.player);
         self.level.update_vision(pov);
+        for entity in self.world.entities() {
+            if entity != self.player {
+                let entity_name = self.world.get_name(entity);
+                eprintln!("The {entity_name} wonders when it will get to take a real turn.");
+            }
+        }
         Ok(())
     }
 
@@ -87,6 +94,21 @@ impl From<(i32, i32)> for Pos {
     }
 }
 
+pub enum PlayerCommand {
+    Bump(i32, i32),
+    Wait,
+}
+
+impl PlayerCommand {
+    fn into_intent(self, actor: Entity) -> ActionIntent {
+        use PlayerCommand::*;
+        match self {
+            Bump(dx, dy) => ActionIntent::Bump { actor, dx, dy },
+            Wait => ActionIntent::Wait { actor },
+        }
+    }
+}
+
 fn spawn_actor(world: &mut World, kind: ActorKind, pos: Option<Pos>) -> Entity {
     let actor = world.spawn();
     if let Some(pos) = pos {
@@ -94,5 +116,6 @@ fn spawn_actor(world: &mut World, kind: ActorKind, pos: Option<Pos>) -> Entity {
     }
     let def = kind.def();
     world.set_glyph(actor, def.glyph);
+    world.set_name(actor, def.name);
     actor
 }

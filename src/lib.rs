@@ -5,7 +5,8 @@ mod ui;
 use anyhow::Result;
 
 use console::Console;
-use logic::{Action, Game};
+use console::Event;
+use logic::{Game, PlayerCommand};
 use ui::{Command, Theme};
 
 pub fn run() -> Result<()> {
@@ -20,13 +21,23 @@ pub fn run() -> Result<()> {
         ui::render_player(&mut console, theme, &game);
         console.display()?;
 
-        match ui::get_command(&mut console)? {
-            Command::Move(dx, dy) => game
-                .player_action(Action::move_by(dx, dy))
-                .or_else(|_| console.alert())?,
-            Command::Redraw => console.reset()?,
-            Command::Abort => break,
-        };
+        let event = console.read_event()?;
+        match event {
+            Event::Abort => break,
+            Event::ClearScreen => console.reset()?,
+            event => {
+                let command = ui::map_play_command(event);
+                match command {
+                    Some(Command::Bump(dx, dy)) => game
+                        .player_command(PlayerCommand::Bump(dx, dy))
+                        .or_else(|_| console.alert())?,
+                    Some(Command::Wait) => game
+                        .player_command(PlayerCommand::Wait)
+                        .or_else(|_| console.alert())?,
+                    None => console.alert()?,
+                }
+            }
+        }
     }
 
     Ok(())

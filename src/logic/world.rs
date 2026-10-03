@@ -2,12 +2,14 @@ use std::collections::HashMap;
 
 use slotmap::{SecondaryMap, SlotMap, new_key_type};
 
+use super::behaviors::Behavior;
 use super::{Glyph, Pos};
 
 new_key_type! {
     pub struct Entity;
 }
 
+#[derive(Default)]
 pub struct World {
     // entity ID
     entities: SlotMap<Entity, ()>,
@@ -17,28 +19,15 @@ pub struct World {
     // other components
     glyphs: SecondaryMap<Entity, Glyph>,
     names: SecondaryMap<Entity, &'static str>,
+    behaviors: SecondaryMap<Entity, Behavior>,
 }
 
 impl World {
     pub fn new() -> Self {
-        Self {
-            entities: SlotMap::with_key(),
-            positions: SecondaryMap::new(),
-            occupancy: HashMap::new(),
-            glyphs: SecondaryMap::new(),
-            names: SecondaryMap::new(),
-        }
+        Self::default()
     }
 
-    pub fn clear(&mut self) {
-        self.entities.clear();
-        self.positions.clear();
-        self.occupancy.clear();
-        self.glyphs.clear();
-        self.names.clear();
-    }
-
-    pub fn entities(&self) -> slotmap::basic::Keys<'_, Entity, ()> {
+    pub fn entities(&self) -> impl Iterator<Item = Entity> {
         self.entities.keys()
     }
 
@@ -54,6 +43,7 @@ impl World {
         }
         self.glyphs.remove(entity);
         self.names.remove(entity);
+        self.behaviors.remove(entity);
     }
 
     pub fn get_position(&self, entity: Entity) -> Pos {
@@ -94,5 +84,18 @@ impl World {
 
     pub fn set_name(&mut self, entity: Entity, name: &'static str) {
         self.names.insert(entity, name);
+    }
+
+    pub fn behaviors(&self) -> impl Iterator<Item = (Entity, &Behavior)> {
+        self.behaviors.iter()
+    }
+
+    pub fn get_behavior(&self, entity: Entity) -> &Behavior {
+        debug_assert!(self.behaviors.contains_key(entity));
+        &self.behaviors[entity]
+    }
+
+    pub fn set_behavior(&mut self, entity: Entity, behavior: Behavior) {
+        self.behaviors.insert(entity, behavior);
     }
 }

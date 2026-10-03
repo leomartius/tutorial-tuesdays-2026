@@ -1,11 +1,12 @@
 mod actions;
+mod behaviors;
 mod definitions;
 mod fov;
 mod generate;
 mod level;
 mod world;
 
-use actions::ActionIntent;
+use actions::{ActionIntent, ActionPlan};
 use definitions::ActorKind;
 use level::Level;
 use world::{Entity, World};
@@ -33,15 +34,24 @@ impl Game {
         let intent = command.into_intent(self.player);
         let plan = intent.validate(self).map_err(|_| ())?;
         plan.perform(self);
+        self.end_turn();
+        Ok(())
+    }
+
+    fn end_turn(&mut self) {
         let pov = self.world.get_position(self.player);
         self.level.update_vision(pov);
-        for entity in self.world.entities() {
-            if entity != self.player {
-                let entity_name = self.world.get_name(entity);
-                eprintln!("The {entity_name} wonders when it will get to take a real turn.");
-            }
+        self.handle_enemy_turns();
+    }
+
+    fn handle_enemy_turns(&mut self) {
+        let actors: Vec<_> = self.world.behaviors().map(|(e, _)| e).collect();
+        for actor in actors {
+            let behavior = self.world.get_behavior(actor);
+            let intent = behavior.take_turn(self, actor);
+            let plan = intent.validate(self).unwrap_or(ActionPlan::Wait { actor });
+            plan.perform(self);
         }
-        Ok(())
     }
 
     pub fn level(&self) -> &Level {
@@ -83,6 +93,10 @@ impl Pos {
             y: self.y + dy,
         }
     }
+
+    pub fn delta(self, other: Self) -> (i32, i32) {
+        (other.x - self.x, other.y - self.y)
+    }
 }
 
 impl From<(i32, i32)> for Pos {
@@ -117,5 +131,8 @@ fn spawn_actor(world: &mut World, kind: ActorKind, pos: Option<Pos>) -> Entity {
     let def = kind.def();
     world.set_glyph(actor, def.glyph);
     world.set_name(actor, def.name);
+    if let Some(behavior_def) = def.behavior {
+        world.set_behavior(actor, behavior_def.instantiate());
+    }
     actor
 }

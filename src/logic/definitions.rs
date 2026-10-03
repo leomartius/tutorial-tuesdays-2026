@@ -1,6 +1,7 @@
 //! Entity definitions.
 
 use super::Glyph;
+use super::behaviors::BehaviorDef;
 
 pub enum ActorKind {
     Player,
@@ -11,6 +12,7 @@ pub enum ActorKind {
 pub struct ActorDef {
     pub name: &'static str,
     pub glyph: Glyph,
+    pub behavior: Option<BehaviorDef>,
 }
 
 impl ActorKind {
@@ -19,14 +21,17 @@ impl ActorKind {
             ActorKind::Player => ActorDef {
                 name: "Player",
                 glyph: Glyph::Player,
+                behavior: None,
             },
             ActorKind::Orc => ActorDef {
                 name: "Orc",
                 glyph: Glyph::Orc,
+                behavior: Some(BehaviorDef::Hostile),
             },
             ActorKind::Troll => ActorDef {
                 name: "Troll",
                 glyph: Glyph::Troll,
+                behavior: Some(BehaviorDef::Hostile),
             },
         }
     }

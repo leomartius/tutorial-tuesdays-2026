@@ -15,6 +15,7 @@ pub enum ActionPlan {
 
 pub enum ActionError {
     DestinationBlocked,
+    DestinationNotAdjacent,
     DestinationOutOfBounds,
     NoTarget,
 }
@@ -48,7 +49,11 @@ fn validate_melee(game: &Game, actor: Entity, dx: i32, dy: i32) -> Result<Action
 }
 
 fn validate_move(game: &Game, actor: Entity, dx: i32, dy: i32) -> Result<ActionPlan, ActionError> {
-    let dest = game.world.get_position(actor).offset(dx, dy);
+    let actor_pos = game.world.get_position(actor);
+    let dest = actor_pos.offset(dx, dy);
+    if !game.level.is_adjacent_to(actor_pos, dest) {
+        return Err(ActionError::DestinationNotAdjacent);
+    }
     if !game.level.in_bounds(dest) {
         return Err(ActionError::DestinationOutOfBounds);
     }
@@ -74,8 +79,9 @@ impl ActionPlan {
 }
 
 fn perform_melee(game: &mut Game, actor: Entity, target: Entity) {
+    let actor_name = game.world.get_name(actor);
     let target_name = game.world.get_name(target);
-    eprintln!("You kick the {target_name}, much to its annoyance!");
+    eprintln!("The {actor_name} attacks the {target_name}!");
 }
 
 fn perform_move(game: &mut Game, actor: Entity, dest: Pos) {

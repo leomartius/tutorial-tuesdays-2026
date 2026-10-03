@@ -41,6 +41,13 @@ impl Level {
         0 <= pos.x && pos.x < self.width && 0 <= pos.y && pos.y < self.height
     }
 
+    pub fn is_adjacent_to(&self, p: Pos, q: Pos) -> bool {
+        debug_assert!(self.in_bounds(p) && self.in_bounds(q));
+        debug_assert!(p != q);
+        let (dx, dy) = p.delta(q);
+        (-1..=1).contains(&dx) && (-1..=1).contains(&dy)
+    }
+
     pub fn get_tile(&self, pos: Pos) -> Tile {
         let index = self.index(pos);
         self.tiles[index]
@@ -66,16 +73,6 @@ impl Level {
         self.get_tile(pos) == Tile::Floor
     }
 
-    pub fn is_visible(&self, pos: Pos) -> bool {
-        let index = self.index(pos);
-        self.visible[index]
-    }
-
-    pub fn is_explored(&self, pos: Pos) -> bool {
-        let index = self.index(pos);
-        self.explored[index]
-    }
-
     pub fn update_vision(&mut self, pov: Pos) {
         let radius = 8;
         self.visible.fill(false);
@@ -92,5 +89,15 @@ impl Level {
             (pov.x, pov.y),
             radius,
         );
+    }
+
+    pub fn is_visible(&self, pos: Pos) -> bool {
+        let index = self.index(pos);
+        self.visible[index]
+    }
+
+    pub fn is_explored(&self, pos: Pos) -> bool {
+        let index = self.index(pos);
+        self.explored[index]
     }
 }

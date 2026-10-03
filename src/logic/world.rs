@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use slotmap::{SecondaryMap, SlotMap, new_key_type};
 
-use super::{Glyph, Vec2};
+use super::{Glyph, Pos};
 
 new_key_type! {
     pub struct Entity;
@@ -10,8 +10,8 @@ new_key_type! {
 
 pub struct World {
     entities: SlotMap<Entity, ()>,
-    positions: SecondaryMap<Entity, Vec2>,
-    occupancy: HashMap<Vec2, Entity>,
+    positions: SecondaryMap<Entity, Pos>,
+    occupancy: HashMap<Pos, Entity>,
     glyphs: SecondaryMap<Entity, Glyph>,
 }
 
@@ -49,12 +49,12 @@ impl World {
         self.glyphs.remove(entity);
     }
 
-    pub fn get_position(&self, entity: Entity) -> Vec2 {
+    pub fn get_position(&self, entity: Entity) -> Pos {
         debug_assert!(self.positions.contains_key(entity));
         self.positions[entity]
     }
 
-    pub fn set_position(&mut self, entity: Entity, pos: Vec2) {
+    pub fn set_position(&mut self, entity: Entity, pos: Pos) {
         let old_pos = self.positions.insert(entity, pos);
         if let Some(old_pos) = old_pos {
             self.occupancy.remove(&old_pos);
@@ -63,11 +63,11 @@ impl World {
         self.occupancy.insert(pos, entity);
     }
 
-    pub fn entity_at(&self, pos: Vec2) -> Option<Entity> {
+    pub fn entity_at(&self, pos: Pos) -> Option<Entity> {
         self.occupancy.get(&pos).copied()
     }
 
-    pub fn is_occupied(&self, pos: Vec2) -> bool {
+    pub fn is_occupied(&self, pos: Pos) -> bool {
         self.occupancy.contains_key(&pos)
     }
 

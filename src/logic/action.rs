@@ -1,4 +1,4 @@
-use super::{Game, Vec2, world::Entity};
+use super::{Game, world::Entity};
 
 pub enum Action {
     Move { dx: i32, dy: i32 },
@@ -12,7 +12,7 @@ impl Action {
     pub fn validate(&self, actor: Entity, game: &Game) -> Result<(), ()> {
         match self {
             Action::Move { dx, dy } => {
-                let pos = game.world.get_position(actor) + Vec2 { x: *dx, y: *dy };
+                let pos = game.world.get_position(actor).offset(*dx, *dy);
                 if game.level.in_bounds(pos)
                     && game.level.is_walkable(pos)
                     && !game.world.is_occupied(pos)
@@ -27,7 +27,7 @@ impl Action {
     pub fn perform(&self, actor: Entity, game: &mut Game) {
         match self {
             Action::Move { dx, dy } => {
-                let pos = game.world.get_position(actor) + Vec2 { x: *dx, y: *dy };
+                let pos = game.world.get_position(actor).offset(*dx, *dy);
                 game.world.set_position(actor, pos);
             }
         }

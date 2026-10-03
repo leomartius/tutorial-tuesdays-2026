@@ -1,7 +1,7 @@
 use std::cmp::{max, min};
 
 use super::fov::compute_fov;
-use super::{Tile, Vec2};
+use super::{Pos, Tile};
 
 pub struct Level {
     width: i32,
@@ -32,21 +32,21 @@ impl Level {
         self.height
     }
 
-    fn index(&self, pos: Vec2) -> usize {
+    fn index(&self, pos: Pos) -> usize {
         debug_assert!(self.in_bounds(pos));
         (pos.y as usize) * (self.width as usize) + (pos.x as usize)
     }
 
-    pub fn in_bounds(&self, pos: Vec2) -> bool {
+    pub fn in_bounds(&self, pos: Pos) -> bool {
         0 <= pos.x && pos.x < self.width && 0 <= pos.y && pos.y < self.height
     }
 
-    pub fn get_tile(&self, pos: Vec2) -> Tile {
+    pub fn get_tile(&self, pos: Pos) -> Tile {
         let index = self.index(pos);
         self.tiles[index]
     }
 
-    pub fn set_tile(&mut self, pos: Vec2, tile: Tile) {
+    pub fn set_tile(&mut self, pos: Pos, tile: Tile) {
         let index = self.index(pos);
         self.tiles[index] = tile;
     }
@@ -62,21 +62,21 @@ impl Level {
         }
     }
 
-    pub fn is_walkable(&self, pos: Vec2) -> bool {
+    pub fn is_walkable(&self, pos: Pos) -> bool {
         self.get_tile(pos) == Tile::Floor
     }
 
-    pub fn is_visible(&self, pos: Vec2) -> bool {
+    pub fn is_visible(&self, pos: Pos) -> bool {
         let index = self.index(pos);
         self.visible[index]
     }
 
-    pub fn is_explored(&self, pos: Vec2) -> bool {
+    pub fn is_explored(&self, pos: Pos) -> bool {
         let index = self.index(pos);
         self.explored[index]
     }
 
-    pub fn update_vision(&mut self, pov: Vec2) {
+    pub fn update_vision(&mut self, pov: Pos) {
         let radius = 8;
         self.visible.fill(false);
         let is_transparent =

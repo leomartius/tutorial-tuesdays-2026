@@ -5,8 +5,6 @@ mod generate;
 mod level;
 mod world;
 
-use std::ops::Add;
-
 pub use action::Action;
 use definitions::ActorKind;
 use level::Level;
@@ -66,31 +64,30 @@ pub enum Glyph {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Vec2 {
+pub struct Pos {
     pub x: i32,
     pub y: i32,
 }
 
-impl From<(i32, i32)> for Vec2 {
+impl Pos {
+    pub fn offset(self, dx: i32, dy: i32) -> Self {
+        Self {
+            x: self.x + dx,
+            y: self.y + dy,
+        }
+    }
+}
+
+impl From<(i32, i32)> for Pos {
     fn from(tuple: (i32, i32)) -> Self {
-        Vec2 {
+        Self {
             x: tuple.0,
             y: tuple.1,
         }
     }
 }
 
-impl Add for Vec2 {
-    type Output = Self;
-    fn add(self, rhs: Self) -> Self::Output {
-        Self {
-            x: self.x + rhs.x,
-            y: self.y + rhs.y,
-        }
-    }
-}
-
-fn spawn_actor(world: &mut World, kind: ActorKind, pos: Option<Vec2>) -> Entity {
+fn spawn_actor(world: &mut World, kind: ActorKind, pos: Option<Pos>) -> Entity {
     let actor = world.spawn();
     if let Some(pos) = pos {
         world.set_position(actor, pos);

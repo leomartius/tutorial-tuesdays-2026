@@ -1,13 +1,14 @@
 use crate::console::Console;
-use crate::logic::{Game, Vec2};
+use crate::logic::{Game, Pos};
 
 use super::theme::Theme;
 
 pub fn render_map(console: &mut Console, theme: Theme, game: &Game) {
     for y in 0..game.level().height() {
         for x in 0..game.level().width() {
-            let tile = game.level().get_tile(Vec2 { x, y });
-            if game.level().is_visible(Vec2 { x, y }) {
+            let pos = Pos { x, y };
+            let tile = game.level().get_tile(pos);
+            if game.level().is_visible(pos) {
                 console.set_cell(
                     x,
                     y,
@@ -15,7 +16,7 @@ pub fn render_map(console: &mut Console, theme: Theme, game: &Game) {
                     theme.visible_fg(tile),
                     theme.visible_bg(tile),
                 );
-            } else if game.level().is_explored(Vec2 { x, y }) {
+            } else if game.level().is_explored(pos) {
                 console.set_cell(
                     x,
                     y,

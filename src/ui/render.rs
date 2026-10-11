@@ -1,5 +1,5 @@
 use crate::console::{Color, Console};
-use crate::logic::{Game, Pos};
+use crate::logic::{Game, Glyph, Pos};
 
 use super::theme::Theme;
 
@@ -30,10 +30,15 @@ pub fn render_map(console: &mut Console, theme: Theme, game: &Game) {
 }
 
 pub fn render_entities(console: &mut Console, theme: Theme, game: &Game) {
-    for e in game.world().entities() {
-        let pos = game.world().get_position(e);
-        if game.level().is_visible(pos) {
-            let glyph = game.world().get_glyph(e);
+    let visible_entities: Vec<_> = (game.world().positions())
+        .filter(|&(_, &p)| game.level().is_visible(p))
+        .map(|(e, &p)| (e, p, game.world().get_glyph(e)))
+        .collect();
+    for &(_, pos, glyph) in &visible_entities {
+        console.print_char(pos.x, pos.y, theme.entity_ch(glyph), theme.entity_fg(glyph));
+    }
+    for &(_, pos, glyph) in &visible_entities {
+        if glyph != Glyph::Corpse {
             console.print_char(pos.x, pos.y, theme.entity_ch(glyph), theme.entity_fg(glyph));
         }
     }

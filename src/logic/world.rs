@@ -53,6 +53,10 @@ impl World {
         self.stats.remove(entity);
     }
 
+    pub fn positions(&self) -> impl Iterator<Item = (Entity, &Pos)> {
+        self.positions.iter()
+    }
+
     pub fn get_position(&self, entity: Entity) -> Pos {
         debug_assert!(self.positions.contains_key(entity));
         self.positions[entity]

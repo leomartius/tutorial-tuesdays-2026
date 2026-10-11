@@ -84,7 +84,7 @@ pub enum Tile {
     Floor,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub enum Glyph {
     Player,
     Orc,

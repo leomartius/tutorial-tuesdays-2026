@@ -36,6 +36,7 @@ impl Theme {
             Glyph::Player => '@',
             Glyph::Orc => 'o',
             Glyph::Troll => 'T',
+            Glyph::Corpse => '%',
         }
     }
     pub fn entity_fg(&self, glyph: Glyph) -> Color {
@@ -43,6 +44,7 @@ impl Theme {
             Glyph::Player => Color::rgb(255, 255, 255),
             Glyph::Orc => Color::rgb(63, 127, 63),
             Glyph::Troll => Color::rgb(0, 127, 0),
+            Glyph::Corpse => Color::rgb(191, 0, 0),
         }
     }
 }

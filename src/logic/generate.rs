@@ -117,7 +117,7 @@ pub fn generate_level(world: &mut World, player: Entity) -> Level {
 fn place_monsters(room: &Room, world: &mut World, rng: &mut impl RngExt) {
     for _ in 0..rng.random_range(0..=MAX_MONSTERS_PER_ROOM) {
         let pos = room.random_xy(rng).into();
-        if world.is_occupied(pos) {
+        if world.is_blocked(pos) {
             continue;
         }
         let kind = if rng.random_ratio(4, 5) {

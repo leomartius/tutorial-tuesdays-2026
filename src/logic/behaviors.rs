@@ -7,7 +7,7 @@ pub enum BehaviorDef {
 }
 
 impl BehaviorDef {
-    pub fn instantiate(&self) -> Behavior {
+    pub fn instantiate(self) -> Behavior {
         use BehaviorDef::*;
         match self {
             Hostile => Behavior::Hostile(HostileBehavior::default()),
@@ -86,7 +86,7 @@ mod pathfinding {
         ]
         .into_iter()
         .filter(|&(p, _)| level.is_walkable(p))
-        .map(|(p, c)| (p, c * if world.is_occupied(p) { 11 } else { 1 }))
+        .map(|(p, c)| (p, c * if world.is_blocked(p) { 11 } else { 1 }))
         .collect()
     }
 

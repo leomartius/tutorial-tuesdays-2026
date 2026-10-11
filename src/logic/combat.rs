@@ -1,4 +1,4 @@
-use super::{Game, world::Entity};
+use super::{Game, Glyph, world::Entity};
 
 pub struct StatsDef {
     pub max_hp: i32,
@@ -33,6 +33,10 @@ impl Stats {
         self.max_hp
     }
 
+    pub fn dead(&self) -> bool {
+        self.hp == 0
+    }
+
     fn harm(&mut self, damage: i32) {
         debug_assert!(damage >= 0);
         self.hp = (self.hp - damage).max(0);
@@ -55,9 +59,15 @@ pub fn melee_attack(game: &mut Game, attacker: Entity, defender: Entity) {
     }
 
     let def_stats = game.world.get_stats_mut(defender);
-    if def_stats.hp == 0 {
+    if def_stats.dead() {
         let def_name = game.world.get_name(defender);
         eprintln!("{def_name} is dead!");
-        game.world.despawn(defender);
+        kill(game, defender);
     }
+}
+
+fn kill(game: &mut Game, actor: Entity) {
+    game.world.remove_behavior(actor);
+    game.world.remove_blocker(actor);
+    game.world.set_glyph(actor, Glyph::Corpse);
 }

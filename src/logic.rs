@@ -33,6 +33,9 @@ impl Game {
     }
 
     pub fn player_command(&mut self, command: PlayerCommand) -> Result<(), ()> {
+        if self.game_over() {
+            return Err(());
+        }
         let intent = command.into_intent(self.player);
         let plan = intent.validate(self).map_err(|_| ())?;
         plan.perform(self);
@@ -49,10 +52,17 @@ impl Game {
     fn handle_enemy_turns(&mut self) {
         let actors: Vec<_> = self.world.behaviors().map(|(e, _)| e).collect();
         for actor in actors {
+            if self.game_over() {
+                break;
+            }
             let intent = Behavior::take_turn(self, actor);
             let plan = intent.validate(self).unwrap_or(ActionPlan::Wait { actor });
             plan.perform(self);
         }
+    }
+
+    pub fn game_over(&self) -> bool {
+        self.world.get_stats(self.player).dead()
     }
 
     pub fn level(&self) -> &Level {
@@ -79,6 +89,7 @@ pub enum Glyph {
     Player,
     Orc,
     Troll,
+    Corpse,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
@@ -129,6 +140,7 @@ fn spawn_actor(world: &mut World, kind: ActorKind, pos: Option<Pos>) -> Entity {
     if let Some(pos) = pos {
         world.set_position(actor, pos);
     }
+    world.set_blocker(actor);
     let def = kind.def();
     world.set_glyph(actor, def.glyph);
     world.set_name(actor, def.name);

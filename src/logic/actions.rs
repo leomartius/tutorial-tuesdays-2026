@@ -34,9 +34,10 @@ impl ActionIntent {
 
 fn validate_bump(game: &Game, actor: Entity, dx: i32, dy: i32) -> Result<ActionPlan, ActionError> {
     let dest = game.world.get_position(actor).offset(dx, dy);
-    match game.world.entity_at(dest) {
-        Some(_) => validate_melee(game, actor, dx, dy),
-        None => validate_move(game, actor, dx, dy),
+    if game.world.is_blocked(dest) {
+        validate_melee(game, actor, dx, dy)
+    } else {
+        validate_move(game, actor, dx, dy)
     }
 }
 
@@ -49,7 +50,7 @@ fn validate_melee(game: &Game, actor: Entity, dx: i32, dy: i32) -> Result<Action
     if !game.level.is_adjacent_to(actor_pos, dest) {
         return Err(ActionError::DestinationNotAdjacent);
     }
-    match game.world.entity_at(dest) {
+    match game.world.blocker_at(dest) {
         Some(target) => Ok(ActionPlan::Melee { actor, target }),
         None => Err(ActionError::NoTarget),
     }
@@ -64,7 +65,7 @@ fn validate_move(game: &Game, actor: Entity, dx: i32, dy: i32) -> Result<ActionP
     if !game.level.is_adjacent_to(actor_pos, dest) {
         return Err(ActionError::DestinationNotAdjacent);
     }
-    if !game.level.is_walkable(dest) || game.world.is_occupied(dest) {
+    if !game.level.is_walkable(dest) || game.world.is_blocked(dest) {
         return Err(ActionError::DestinationBlocked);
     }
     Ok(ActionPlan::Move { actor, dest })

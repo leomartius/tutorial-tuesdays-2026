@@ -10,6 +10,8 @@ new_key_type! {
     pub struct Entity;
 }
 
+struct Blocker;
+
 #[derive(Default)]
 pub struct World {
     // entity ID
@@ -17,6 +19,7 @@ pub struct World {
     // entity position + reverse spatial index
     positions: SecondaryMap<Entity, Pos>,
     occupancy: HashMap<Pos, Entity>,
+    blockers: SecondaryMap<Entity, Blocker>,
     // other components
     glyphs: SecondaryMap<Entity, Glyph>,
     names: SecondaryMap<Entity, &'static str>,
@@ -43,6 +46,7 @@ impl World {
         if let Some(old_pos) = old_pos {
             self.occupancy.remove(&old_pos);
         }
+        self.blockers.remove(entity);
         self.glyphs.remove(entity);
         self.names.remove(entity);
         self.behaviors.remove(entity);
@@ -56,18 +60,33 @@ impl World {
 
     pub fn set_position(&mut self, entity: Entity, pos: Pos) {
         let old_pos = self.positions.insert(entity, pos);
-        if let Some(old_pos) = old_pos {
-            self.occupancy.remove(&old_pos);
+        if self.blockers.contains_key(entity) {
+            if let Some(old_pos) = old_pos {
+                self.occupancy.remove(&old_pos);
+            }
+            self.occupancy.insert(pos, entity);
         }
-        debug_assert!(!self.occupancy.contains_key(&pos));
-        self.occupancy.insert(pos, entity);
     }
 
-    pub fn entity_at(&self, pos: Pos) -> Option<Entity> {
+    pub fn set_blocker(&mut self, entity: Entity) {
+        self.blockers.insert(entity, Blocker);
+        if let Some(&pos) = self.positions.get(entity) {
+            self.occupancy.insert(pos, entity);
+        }
+    }
+
+    pub fn remove_blocker(&mut self, entity: Entity) {
+        self.blockers.remove(entity);
+        if let Some(pos) = self.positions.get(entity) {
+            self.occupancy.remove(pos);
+        }
+    }
+
+    pub fn blocker_at(&self, pos: Pos) -> Option<Entity> {
         self.occupancy.get(&pos).copied()
     }
 
-    pub fn is_occupied(&self, pos: Pos) -> bool {
+    pub fn is_blocked(&self, pos: Pos) -> bool {
         self.occupancy.contains_key(&pos)
     }
 
@@ -105,6 +124,10 @@ impl World {
 
     pub fn set_behavior(&mut self, entity: Entity, behavior: Behavior) {
         self.behaviors.insert(entity, behavior);
+    }
+
+    pub fn remove_behavior(&mut self, entity: Entity) {
+        self.behaviors.remove(entity);
     }
 
     pub fn get_stats(&self, entity: Entity) -> &Stats {

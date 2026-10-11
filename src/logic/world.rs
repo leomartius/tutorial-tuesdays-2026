@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use slotmap::{SecondaryMap, SlotMap, new_key_type};
 
 use super::behaviors::Behavior;
+use super::combat::Stats;
 use super::{Glyph, Pos};
 
 new_key_type! {
@@ -20,6 +21,7 @@ pub struct World {
     glyphs: SecondaryMap<Entity, Glyph>,
     names: SecondaryMap<Entity, &'static str>,
     behaviors: SecondaryMap<Entity, Behavior>,
+    stats: SecondaryMap<Entity, Stats>,
 }
 
 impl World {
@@ -44,6 +46,7 @@ impl World {
         self.glyphs.remove(entity);
         self.names.remove(entity);
         self.behaviors.remove(entity);
+        self.stats.remove(entity);
     }
 
     pub fn get_position(&self, entity: Entity) -> Pos {
@@ -102,5 +105,19 @@ impl World {
 
     pub fn set_behavior(&mut self, entity: Entity, behavior: Behavior) {
         self.behaviors.insert(entity, behavior);
+    }
+
+    pub fn get_stats(&self, entity: Entity) -> &Stats {
+        debug_assert!(self.stats.contains_key(entity));
+        &self.stats[entity]
+    }
+
+    pub fn get_stats_mut(&mut self, entity: Entity) -> &mut Stats {
+        debug_assert!(self.stats.contains_key(entity));
+        &mut self.stats[entity]
+    }
+
+    pub fn set_stats(&mut self, entity: Entity, stats: Stats) {
+        self.stats.insert(entity, stats);
     }
 }

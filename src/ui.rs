@@ -4,6 +4,7 @@ mod theme;
 
 pub use input::map_play_command;
 pub use render::render_entities;
+pub use render::render_hp;
 pub use render::render_map;
 pub use render::render_player;
 pub use theme::Theme;

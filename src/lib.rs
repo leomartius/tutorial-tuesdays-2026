@@ -19,6 +19,7 @@ pub fn run() -> Result<()> {
         ui::render_map(&mut console, theme, &game);
         ui::render_entities(&mut console, theme, &game);
         ui::render_player(&mut console, theme, &game);
+        ui::render_hp(&mut console, theme, &game);
         console.display()?;
 
         let event = console.read_event()?;

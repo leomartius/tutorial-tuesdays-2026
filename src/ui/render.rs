@@ -1,4 +1,4 @@
-use crate::console::Console;
+use crate::console::{Color, Console};
 use crate::logic::{Game, Pos};
 
 use super::theme::Theme;
@@ -43,4 +43,11 @@ pub fn render_player(console: &mut Console, _theme: Theme, game: &Game) {
     let player = game.player();
     let pos = game.world().get_position(player);
     console.show_cursor(pos.x, pos.y);
+}
+
+pub fn render_hp(console: &mut Console, _theme: Theme, game: &Game) {
+    let player = game.player();
+    let stats = game.world().get_stats(player);
+    let text = format!("HP: {}/{}", stats.hp(), stats.max_hp());
+    console.print_str(1, 47, &text, Color::Default);
 }

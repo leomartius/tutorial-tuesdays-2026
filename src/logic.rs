@@ -1,5 +1,6 @@
 mod actions;
 mod behaviors;
+mod combat;
 mod definitions;
 mod fov;
 mod generate;
@@ -133,6 +134,9 @@ fn spawn_actor(world: &mut World, kind: ActorKind, pos: Option<Pos>) -> Entity {
     world.set_name(actor, def.name);
     if let Some(behavior_def) = def.behavior {
         world.set_behavior(actor, behavior_def.instantiate());
+    }
+    if let Some(stats_def) = def.stats {
+        world.set_stats(actor, stats_def.instantiate());
     }
     actor
 }

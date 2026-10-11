@@ -1,4 +1,4 @@
-use super::{Game, Pos, world::Entity};
+use super::{Game, Pos, combat, world::Entity};
 
 pub enum ActionIntent {
     Bump { actor: Entity, dx: i32, dy: i32 },
@@ -41,7 +41,14 @@ fn validate_bump(game: &Game, actor: Entity, dx: i32, dy: i32) -> Result<ActionP
 }
 
 fn validate_melee(game: &Game, actor: Entity, dx: i32, dy: i32) -> Result<ActionPlan, ActionError> {
-    let dest = game.world.get_position(actor).offset(dx, dy);
+    let actor_pos = game.world.get_position(actor);
+    let dest = actor_pos.offset(dx, dy);
+    if !game.level.in_bounds(dest) {
+        return Err(ActionError::DestinationOutOfBounds);
+    }
+    if !game.level.is_adjacent_to(actor_pos, dest) {
+        return Err(ActionError::DestinationNotAdjacent);
+    }
     match game.world.entity_at(dest) {
         Some(target) => Ok(ActionPlan::Melee { actor, target }),
         None => Err(ActionError::NoTarget),
@@ -51,11 +58,11 @@ fn validate_melee(game: &Game, actor: Entity, dx: i32, dy: i32) -> Result<Action
 fn validate_move(game: &Game, actor: Entity, dx: i32, dy: i32) -> Result<ActionPlan, ActionError> {
     let actor_pos = game.world.get_position(actor);
     let dest = actor_pos.offset(dx, dy);
-    if !game.level.is_adjacent_to(actor_pos, dest) {
-        return Err(ActionError::DestinationNotAdjacent);
-    }
     if !game.level.in_bounds(dest) {
         return Err(ActionError::DestinationOutOfBounds);
+    }
+    if !game.level.is_adjacent_to(actor_pos, dest) {
+        return Err(ActionError::DestinationNotAdjacent);
     }
     if !game.level.is_walkable(dest) || game.world.is_occupied(dest) {
         return Err(ActionError::DestinationBlocked);
@@ -79,9 +86,7 @@ impl ActionPlan {
 }
 
 fn perform_melee(game: &mut Game, actor: Entity, target: Entity) {
-    let actor_name = game.world.get_name(actor);
-    let target_name = game.world.get_name(target);
-    eprintln!("The {actor_name} attacks the {target_name}!");
+    combat::melee_attack(game, actor, target);
 }
 
 fn perform_move(game: &mut Game, actor: Entity, dest: Pos) {

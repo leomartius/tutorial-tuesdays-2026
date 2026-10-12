@@ -12,7 +12,7 @@ impl Scene for GameScene {
         render_map(console, theme, game);
         render_entities(console, theme, game);
         render_player(console, theme, game);
-        render_hp(console, theme, game);
+        render_hp_bar(console, theme, game);
     }
 
     fn handle_event(&mut self, game: &mut Game, event: Event) -> Transition {

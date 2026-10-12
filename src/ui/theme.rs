@@ -47,4 +47,14 @@ impl Theme {
             Glyph::Corpse => Color::rgb(191, 0, 0),
         }
     }
+
+    pub fn hp_bar_text(&self) -> Color {
+        Color::rgb(255, 255, 255)
+    }
+    pub fn hp_bar_full(&self) -> Color {
+        Color::rgb(0, 176, 0)
+    }
+    pub fn hp_bar_empty(&self) -> Color {
+        Color::rgb(144, 16, 16)
+    }
 }

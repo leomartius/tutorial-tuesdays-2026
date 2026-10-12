@@ -1,4 +1,4 @@
-use crate::console::{Color, Console};
+use crate::console::Console;
 use crate::logic::{Game, Glyph, Pos};
 
 use super::theme::Theme;
@@ -50,9 +50,13 @@ pub fn render_player(console: &mut Console, _theme: Theme, game: &Game) {
     console.show_cursor(pos.x, pos.y);
 }
 
-pub fn render_hp(console: &mut Console, _theme: Theme, game: &Game) {
+pub fn render_hp_bar(console: &mut Console, theme: Theme, game: &Game) {
     let player = game.player();
     let stats = game.world().get_stats(player);
+    let max_width = 20;
+    let bar_width = stats.hp() * max_width / stats.max_hp();
+    console.fill_rect(0, 45, max_width, 1, theme.hp_bar_empty());
+    console.fill_rect(0, 45, bar_width, 1, theme.hp_bar_full());
     let text = format!("HP: {}/{}", stats.hp(), stats.max_hp());
-    console.print_str(1, 47, &text, Color::Default);
+    console.print_str(1, 45, &text, theme.hp_bar_text());
 }

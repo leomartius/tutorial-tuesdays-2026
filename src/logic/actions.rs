@@ -1,10 +1,21 @@
 use super::{Game, Pos, combat, world::Entity};
 
-pub enum ActionIntent {
-    Bump { actor: Entity, dx: i32, dy: i32 },
-    Melee { actor: Entity, dx: i32, dy: i32 },
-    Move { actor: Entity, dx: i32, dy: i32 },
-    Wait { actor: Entity },
+pub enum ActionKind {
+    Bump(i32, i32),
+    Melee(i32, i32),
+    Move(i32, i32),
+    Wait,
+}
+
+impl ActionKind {
+    pub fn into_intent(self, actor: Entity) -> ActionIntent {
+        ActionIntent { actor, kind: self }
+    }
+}
+
+pub struct ActionIntent {
+    actor: Entity,
+    kind: ActionKind,
 }
 
 pub enum ActionPlan {
@@ -22,12 +33,13 @@ pub enum ActionError {
 
 impl ActionIntent {
     pub fn validate(self, game: &Game) -> Result<ActionPlan, ActionError> {
-        use ActionIntent::*;
-        match self {
-            Bump { actor, dx, dy } => validate_bump(game, actor, dx, dy),
-            Melee { actor, dx, dy } => validate_melee(game, actor, dx, dy),
-            Move { actor, dx, dy } => validate_move(game, actor, dx, dy),
-            Wait { actor } => validate_wait(game, actor),
+        let actor = self.actor;
+        use ActionKind::*;
+        match self.kind {
+            Bump(dx, dy) => validate_bump(game, actor, dx, dy),
+            Melee(dx, dy) => validate_melee(game, actor, dx, dy),
+            Move(dx, dy) => validate_move(game, actor, dx, dy),
+            Wait => validate_wait(game, actor),
         }
     }
 }

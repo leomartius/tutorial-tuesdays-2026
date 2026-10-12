@@ -1,4 +1,4 @@
-use super::actions::ActionIntent;
+use super::actions::{ActionIntent, ActionKind};
 use super::world::Entity;
 use super::{Game, Pos};
 
@@ -22,9 +22,10 @@ pub enum Behavior {
 impl Behavior {
     pub fn take_turn(game: &mut Game, actor: Entity) -> ActionIntent {
         use Behavior::*;
-        match game.world.get_behavior(actor) {
+        let action = match game.world.get_behavior(actor) {
             Hostile(_) => HostileBehavior::take_turn(game, actor),
-        }
+        };
+        action.into_intent(actor)
     }
 }
 
@@ -35,13 +36,13 @@ pub struct HostileBehavior {
 }
 
 impl HostileBehavior {
-    fn take_turn(game: &mut Game, actor: Entity) -> ActionIntent {
+    fn take_turn(game: &mut Game, actor: Entity) -> ActionKind {
         let target = game.player();
         let actor_pos = game.world().get_position(actor);
         let target_pos = game.world().get_position(target);
         if game.level.is_adjacent_to(actor_pos, target_pos) {
             let (dx, dy) = actor_pos.delta(target_pos);
-            return ActionIntent::Melee { actor, dx, dy };
+            return ActionKind::Melee(dx, dy);
         }
         if game.level.is_visible(actor_pos) {
             let path = pathfinding::find_path(actor_pos, target_pos, &game.level, &game.world);
@@ -60,9 +61,9 @@ impl HostileBehavior {
         }
         if let Some(&next) = state.path.get(state.index) {
             let (dx, dy) = actor_pos.delta(next);
-            return ActionIntent::Move { actor, dx, dy };
+            return ActionKind::Move(dx, dy);
         }
-        ActionIntent::Wait { actor }
+        ActionKind::Wait
     }
 }
 

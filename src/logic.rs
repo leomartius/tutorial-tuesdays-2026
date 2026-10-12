@@ -7,7 +7,8 @@ mod generate;
 mod level;
 mod world;
 
-use actions::{ActionIntent, ActionPlan};
+pub use actions::ActionKind;
+use actions::ActionPlan;
 use behaviors::Behavior;
 use definitions::ActorKind;
 use level::Level;
@@ -32,9 +33,9 @@ impl Game {
         }
     }
 
-    pub fn player_command(&mut self, command: PlayerCommand) -> Result<(), ()> {
+    pub fn submit_player_action(&mut self, action: ActionKind) -> Result<(), ()> {
         debug_assert!(!self.game_over());
-        let intent = command.into_intent(self.player);
+        let intent = action.into_intent(self.player);
         let plan = intent.validate(self).map_err(|_| ())?;
         plan.perform(self);
         self.end_turn();
@@ -114,21 +115,6 @@ impl From<(i32, i32)> for Pos {
         Self {
             x: tuple.0,
             y: tuple.1,
-        }
-    }
-}
-
-pub enum PlayerCommand {
-    Bump(i32, i32),
-    Wait,
-}
-
-impl PlayerCommand {
-    fn into_intent(self, actor: Entity) -> ActionIntent {
-        use PlayerCommand::*;
-        match self {
-            Bump(dx, dy) => ActionIntent::Bump { actor, dx, dy },
-            Wait => ActionIntent::Wait { actor },
         }
     }
 }

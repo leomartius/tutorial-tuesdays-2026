@@ -9,11 +9,6 @@ use crate::logic::Game;
 pub use scenes::GameScene as StartScene;
 pub use theme::Theme;
 
-pub enum Command {
-    Bump(i32, i32),
-    Wait,
-}
-
 pub(crate) struct SceneStack {
     stack: Vec<Box<dyn Scene>>,
 }

@@ -1,9 +1,9 @@
 use crate::console::{Console, Event};
-use crate::logic::{Game, PlayerCommand};
+use crate::logic::Game;
 
 use super::input::*;
 use super::render::*;
-use super::{Command, Scene, Transition, theme::Theme};
+use super::{Scene, Transition, theme::Theme};
 
 pub struct GameScene;
 
@@ -17,22 +17,16 @@ impl Scene for GameScene {
 
     fn handle_event(&mut self, game: &mut Game, event: Event) -> Transition {
         match map_play_command(event) {
-            Some(command) => {
-                let player_command = match command {
-                    Command::Bump(dx, dy) => PlayerCommand::Bump(dx, dy),
-                    Command::Wait => PlayerCommand::Wait,
-                };
-                match game.player_command(player_command) {
-                    Ok(_) => {
-                        if game.game_over() {
-                            Transition::Push(Box::new(GameOver))
-                        } else {
-                            Transition::Okay
-                        }
+            Some(Command::PlayerAction(action)) => match game.submit_player_action(action) {
+                Ok(_) => {
+                    if game.game_over() {
+                        Transition::Push(Box::new(GameOver))
+                    } else {
+                        Transition::Okay
                     }
-                    Err(_) => Transition::Beep,
                 }
-            }
+                Err(_) => Transition::Beep,
+            },
             None => Transition::Beep,
         }
     }

@@ -33,9 +33,7 @@ impl Game {
     }
 
     pub fn player_command(&mut self, command: PlayerCommand) -> Result<(), ()> {
-        if self.game_over() {
-            return Err(());
-        }
+        debug_assert!(!self.game_over());
         let intent = command.into_intent(self.player);
         let plan = intent.validate(self).map_err(|_| ())?;
         plan.perform(self);
